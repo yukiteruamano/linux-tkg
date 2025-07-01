@@ -25,24 +25,29 @@ plain '       `-+shdNNNNNNNNNNNNNNNdhs+-`'
 plain '             `.-:///////:-.`'
 
 _where="$PWD" # track basedir as different Arch based distros are moving srcdir around
-_ispkgbuild="true"
-_distro="Arch"
 
-declare -p -x > current_env
-
-source "$_where"/customization.cfg # load default configuration from file
-
-if [ -e "$_EXT_CONFIG_PATH" ]; then
-  msg2 "External configuration file $_EXT_CONFIG_PATH will be used and will override customization.cfg values."
-  source "$_EXT_CONFIG_PATH"
-fi
-
-source current_env
-
-source "$_where"/linux-tkg-config/prepare
-
-# Make sure we're in a clean state
+# Create BIG_UGLY_FROGMINER only on first run and save in it all settings
 if [ ! -e "$_where"/BIG_UGLY_FROGMINER ]; then
+
+  cp "$_where"/customization.cfg "$_where"/BIG_UGLY_FROGMINER
+
+  # extract and define value of _EXT_CONFIG_PATH from customization file
+  if [[ -z "$_EXT_CONFIG_PATH" ]]; then
+    eval `grep _EXT_CONFIG_PATH "$_where"/customization.cfg`
+  fi
+
+  if [ -f "$_EXT_CONFIG_PATH" ]; then
+    msg2 "External configuration file $_EXT_CONFIG_PATH will be used and will override customization.cfg values."
+    cat "$_EXT_CONFIG_PATH" >> "$_where"/BIG_UGLY_FROGMINER
+  fi
+
+  declare -p -x >> "$_where"/BIG_UGLY_FROGMINER
+
+  echo -e "_ispkgbuild=\"true\"\n_distro=\"Arch\"\n_where=\"$PWD\"" >> "$_where"/BIG_UGLY_FROGMINER
+
+  source "$_where"/BIG_UGLY_FROGMINER
+  source "$_where"/linux-tkg-config/prepare
+
   _tkg_initscript
 fi
 
@@ -67,7 +72,7 @@ fi
 optdepends=('schedtool')
 options=('!strip' 'docs')
 
-for f in "$_where"/linux-tkg-config/"$_basekernel"/* "$_where"/linux-tkg-patches/"$_basekernel"/*; do
+for f in "$_where"/linux-tkg-config/"$_basekernel"/* "$_where"/linux-tkg-patches/"$_basekernel"/*.patch; do
   source+=( "$f" )
   sha256sums+=( "SKIP" )
 done
@@ -77,21 +82,19 @@ export KBUILD_BUILD_USER=$pkgbase
 export KBUILD_BUILD_TIMESTAMP="$(date -Ru${SOURCE_DATE_EPOCH:+d @$SOURCE_DATE_EPOCH})"
 
 prepare() {
+  source "$_where"/BIG_UGLY_FROGMINER
+  source "$_where"/linux-tkg-config/prepare
+
   rm -rf $pkgdir # Nuke the entire pkg folder so it'll get regenerated clean on next build
 
-  _define_kernel_abs_paths
-  if [ -e "${srcdir}/customization.cfg" ]; then
-    msg2 "Nuking remnant customization.cfg symlink" && rm -rf "${srcdir}/customization.cfg"
-  fi
-  ln -s "${_where}/customization.cfg" "${srcdir}"
   ln -s "${_kernel_work_folder_abs}" "${srcdir}"
-
-  source "${_where}/current_env"
 
   _tkg_srcprep
 }
 
 build() {
+  source "$_where"/BIG_UGLY_FROGMINER
+
   cd "$_kernel_work_folder_abs"
 
   # Use custom compiler paths if defined
@@ -134,12 +137,18 @@ build() {
       $_schedtool "$_pid" ||:
       $_ionice -p "$_pid" ||:
     fi
+
+    export KCPPFLAGS
+    export KCFLAGS
+
     time ( make ${_force_all_threads} ${llvm_opt} LOCALVERSION= bzImage modules 2>&1 ) 3>&1 1>&2 2>&3
-    return $?
+    return 0
   )
 }
 
 hackbase() {
+  source "$_where"/BIG_UGLY_FROGMINER
+
   pkgdesc="The $pkgdesc kernel and modules - https://github.com/Frogging-Family/linux-tkg"
   depends=('coreutils' 'kmod' 'initramfs')
   optdepends=('linux-docs: Kernel hackers manual - HTML documentation that comes with the Linux kernel.'
@@ -156,7 +165,6 @@ hackbase() {
   fi
   replaces=(virtualbox-guest-modules-arch wireguard-arch)
 
-  _define_kernel_abs_paths
   cd "$_kernel_work_folder_abs"
 
   # get kernel version
@@ -172,7 +180,11 @@ hackbase() {
   echo "$pkgbase" | install -Dm644 /dev/stdin "$modulesdir/pkgbase"
 
   msg2 "Installing modules..."
-  ZSTD_CLEVEL=19 make INSTALL_MOD_PATH="$pkgdir/usr" INSTALL_MOD_STRIP=1 \
+
+  local _STRIP_MODS=""
+  [[ "$_STRIP" == "true" ]] && _STRIP_MODS="INSTALL_MOD_STRIP=1"
+
+  ZSTD_CLEVEL=19 make INSTALL_MOD_PATH="$pkgdir/usr" $_STRIP_MODS \
     DEPMOD=/doesnt/exist modules_install  # Suppress depmod
 
   # remove build and source links
@@ -188,17 +200,19 @@ hackbase() {
 
   # ntsync
   if [ -e "${srcdir}/ntsync.conf" ]; then
-    # workaround for missing header with ntsync
-    if [ -e "${_kernel_work_folder_abs}/include/uapi/linux/ntsync.h" ] && [ ! -e "/usr/include/linux/ntsync.h" ]; then
-      msg2 "Workaround missing ntsync header"
-      install -Dm644 "${_kernel_work_folder_abs}"/include/uapi/linux/ntsync.h "${pkgdir}/usr/include/linux/ntsync.h"
+    # workaround for missing header on <6.14 with ntsync
+    if [ $_basever -lt 614 ]; then
+      if [ -e "${_kernel_work_folder_abs}/include/uapi/linux/ntsync.h" ] && [ ! -e "/usr/include/linux/ntsync.h" ]; then
+        msg2 "Workaround missing ntsync header"
+        install -Dm644 "${_kernel_work_folder_abs}"/include/uapi/linux/ntsync.h "${pkgdir}/usr/include/linux/ntsync.h"
+      fi
     fi
     # load ntsync module at boot
     msg2 "Set the ntsync module to be loaded at boot through /etc/modules-load.d"
-    install -Dm644 "${srcdir}"/ntsync.conf "${pkgdir}/etc/modules-load.d/ntsync.conf"
+    install -Dm644 "${srcdir}"/ntsync.conf "${pkgdir}/etc/modules-load.d/ntsync-${pkgbase}.conf"
   fi
 
-  # install udev rule for ntsync
+  # install udev rule for ntsync if needed (<6.14)
   if [ -e "${srcdir}/ntsync.rules" ]; then
     msg2 "Installing udev rule for ntsync"
     install -Dm644 "${srcdir}"/ntsync.rules "${pkgdir}/etc/udev/rules.d/ntsync.rules"
@@ -206,6 +220,8 @@ hackbase() {
 }
 
 hackheaders() {
+  source "$_where"/BIG_UGLY_FROGMINER
+
   pkgdesc="Headers and scripts for building modules for the $pkgdesc kernel - https://github.com/Frogging-Family/linux-tkg"
   provides=("linux-headers=${pkgver}" "${pkgbase}-headers=${pkgver}")
   case $_basever in
@@ -216,7 +232,6 @@ hackheaders() {
     ;;
   esac
 
-  _define_kernel_abs_paths
   cd "$_kernel_work_folder_abs"
 
   local builddir="${pkgdir}/usr/lib/modules/$(<version)/build"
