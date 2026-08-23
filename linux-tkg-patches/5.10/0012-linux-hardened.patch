@@ -102,13 +102,13 @@ index e912a47765f3..69514ce4e99a 100644
  	If set, provide RFC2861 behavior and time out the congestion
  	window after an idle period.  An idle period is defined at
 diff --git a/Makefile b/Makefile
-index 9abb9b26d8e5..2b21638ae0c9 100644
+index 1773020dec8d..238007d43a76 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -2,7 +2,7 @@
  VERSION = 5
  PATCHLEVEL = 10
- SUBLEVEL = 264
+ SUBLEVEL = 265
 -EXTRAVERSION =
 +EXTRAVERSION = -hardened1
  NAME = Dare mighty things
@@ -677,7 +677,7 @@ index 7be4e8f77a5c..3c09007452d9 100644
  	usb_debugfs_cleanup();
  	idr_destroy(&usb_bus_idr);
 diff --git a/fs/exec.c b/fs/exec.c
-index 2979b458b650..155b62bb19b0 100644
+index 0ea96114fcf7..44a2973ef36e 100644
 --- a/fs/exec.c
 +++ b/fs/exec.c
 @@ -64,6 +64,7 @@
@@ -1474,7 +1474,7 @@ index a6a4eaec73c8..b31f654e5444 100644
  	bool "Page allocator randomization"
  	default SLAB_FREELIST_RANDOM && ACPI_NUMA
 diff --git a/kernel/audit.c b/kernel/audit.c
-index 7452719c659f..f3009946c918 100644
+index eec8fc5006fd..a0796be01c3e 100644
 --- a/kernel/audit.c
 +++ b/kernel/audit.c
 @@ -1754,6 +1754,9 @@ static int __init audit_enable(char *str)
@@ -2542,8 +2542,9 @@ index 30daba09da35..4eb1d7fc1949 100644
  	/* Clear memory outside IRQ disabled fastpath loop */
 -	if (unlikely(slab_want_init_on_alloc(flags, s))) {
 +	if (has_sanitize_verify(s)) {
-+		int j;
-+
+ 		int j;
+ 
+-		for (j = 0; j < i; j++)
 +		for (j = 0; j < i; j++) {
 +			/* KASAN hasn't unpoisoned the object yet (this is done
 +			 * in the post-alloc hook), so let's do it temporarily.
@@ -2555,9 +2556,8 @@ index 30daba09da35..4eb1d7fc1949 100644
 +			kasan_poison_object_data(s, p[j]);
 +		}
 +	} else if (unlikely(slab_want_init_on_alloc(flags, s))) {
- 		int j;
- 
--		for (j = 0; j < i; j++)
++		int j;
++
 +		for (j = 0; j < i; j++) {
  			memset(p[j], 0, s->object_size);
 +			if (s->ctor) {

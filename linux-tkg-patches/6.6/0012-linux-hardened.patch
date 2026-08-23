@@ -102,13 +102,13 @@ index 531a070df2a6..2d3b8d79380a 100644
  	If set, provide RFC2861 behavior and time out the congestion
  	window after an idle period.  An idle period is defined at
 diff --git a/Makefile b/Makefile
-index 05c17f548757..c21aaddb04d7 100644
+index 13d82f5eefd2..6527221d18f5 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -2,7 +2,7 @@
  VERSION = 6
  PATCHLEVEL = 6
- SUBLEVEL = 151
+ SUBLEVEL = 152
 -EXTRAVERSION =
 +EXTRAVERSION = -hardened1
  NAME = Pinguïn Aangedreven
@@ -801,10 +801,10 @@ index fec5020c3495..d0218abbeec4 100644
 +
 +	  If unsure, say N.
 diff --git a/fs/overlayfs/super.c b/fs/overlayfs/super.c
-index 93ee57bc82ad..23df339a1481 100644
+index 76316d143aaa..9138d5e03e7e 100644
 --- a/fs/overlayfs/super.c
 +++ b/fs/overlayfs/super.c
-@@ -1521,7 +1521,9 @@ struct file_system_type ovl_fs_type = {
+@@ -1522,7 +1522,9 @@ struct file_system_type ovl_fs_type = {
  	.name			= "overlay",
  	.init_fs_context	= ovl_init_fs_context,
  	.parameters		= ovl_parameter_spec,
@@ -1111,10 +1111,10 @@ index 733f2a97589b..27c0dc60207e 100644
  {
  	return &init_user_ns;
 diff --git a/include/net/tcp.h b/include/net/tcp.h
-index a6def0aab3ed..75dfaf28b658 100644
+index 0eb9341f7488..e22de8eb7d0a 100644
 --- a/include/net/tcp.h
 +++ b/include/net/tcp.h
-@@ -249,6 +249,7 @@ void tcp_time_wait(struct sock *sk, int state, int timeo);
+@@ -250,6 +250,7 @@ void tcp_time_wait(struct sock *sk, int state, int timeo);
  /* sysctl variables for tcp */
  extern int sysctl_tcp_max_orphans;
  extern long sysctl_tcp_mem[3];
@@ -2485,10 +2485,10 @@ index 08d494896552..d3d74a0a0964 100644
  
  unsigned long arch_mmap_rnd(void)
 diff --git a/net/core/dev.c b/net/core/dev.c
-index 0cc03e6c6fb1..e68deb2649a8 100644
+index 0fa5431de2cc..2bcdb3de1e24 100644
 --- a/net/core/dev.c
 +++ b/net/core/dev.c
-@@ -5234,7 +5234,7 @@ int netif_rx(struct sk_buff *skb)
+@@ -5247,7 +5247,7 @@ int netif_rx(struct sk_buff *skb)
  }
  EXPORT_SYMBOL(netif_rx);
  
@@ -2497,7 +2497,7 @@ index 0cc03e6c6fb1..e68deb2649a8 100644
  {
  	struct softnet_data *sd = this_cpu_ptr(&softnet_data);
  
-@@ -6813,7 +6813,7 @@ static int napi_threaded_poll(void *data)
+@@ -6826,7 +6826,7 @@ static int napi_threaded_poll(void *data)
  	return 0;
  }
  
@@ -2507,7 +2507,7 @@ index 0cc03e6c6fb1..e68deb2649a8 100644
  	struct softnet_data *sd = this_cpu_ptr(&softnet_data);
  	unsigned long time_limit = jiffies +
 diff --git a/net/ipv4/Kconfig b/net/ipv4/Kconfig
-index 2dfb12230f08..a3a0e658f34b 100644
+index 8e94ed7c56a0..b32b5d9ee67e 100644
 --- a/net/ipv4/Kconfig
 +++ b/net/ipv4/Kconfig
 @@ -267,6 +267,7 @@ config IP_PIMSM_V2
@@ -2518,7 +2518,7 @@ index 2dfb12230f08..a3a0e658f34b 100644
  	help
  	  Normal TCP/IP networking is open to an attack known as "SYN
  	  flooding". This denial-of-service attack prevents legitimate remote
-@@ -751,3 +752,26 @@ config TCP_MD5SIG
+@@ -768,3 +769,26 @@ config TCP_MD5SIG
  	  on the Internet.
  
  	  If unsure, say N.
@@ -2566,7 +2566,7 @@ index ff849a5b863e..c3c38305bfa2 100644
  };
  
 diff --git a/net/ipv4/tcp_input.c b/net/ipv4/tcp_input.c
-index eb1bf5863474..26905cf6dbf1 100644
+index 9efb84658a82..410647aa4968 100644
 --- a/net/ipv4/tcp_input.c
 +++ b/net/ipv4/tcp_input.c
 @@ -82,6 +82,7 @@

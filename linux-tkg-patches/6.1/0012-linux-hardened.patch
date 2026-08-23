@@ -102,13 +102,13 @@ index b47b3d0ce559..6ac658944390 100644
  	If set, provide RFC2861 behavior and time out the congestion
  	window after an idle period.  An idle period is defined at
 diff --git a/Makefile b/Makefile
-index a8d0a4d5fdc3..f45ddb588275 100644
+index 3bcd978b96e3..3866ae42bc6b 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -2,7 +2,7 @@
  VERSION = 6
  PATCHLEVEL = 1
- SUBLEVEL = 182
+ SUBLEVEL = 183
 -EXTRAVERSION =
 +EXTRAVERSION = -hardened1
  NAME = Curry Ramen
@@ -698,7 +698,7 @@ index 2215f8ca5417..23bcab3f1df3 100644
  	usb_debugfs_cleanup();
  	idr_destroy(&usb_bus_idr);
 diff --git a/fs/exec.c b/fs/exec.c
-index a4d21a67723d..94fd880c0d2c 100644
+index 9172cafa3f4c..ebe8adaa74e1 100644
 --- a/fs/exec.c
 +++ b/fs/exec.c
 @@ -64,6 +64,7 @@
@@ -1219,7 +1219,7 @@ index b70e0e05a185..41b95c78eb1d 100644
  	  This option enables POSIX asynchronous I/O which may by used
  	  by some high performance threaded applications. Disabling
 diff --git a/kernel/audit.c b/kernel/audit.c
-index 72f28cbad8a6..db467549abe6 100644
+index 97b41d73eb69..9c265a296c52 100644
 --- a/kernel/audit.c
 +++ b/kernel/audit.c
 @@ -1752,6 +1752,9 @@ static int __init audit_enable(char *str)
@@ -1233,10 +1233,10 @@ index 72f28cbad8a6..db467549abe6 100644
  		pr_err("audit: error setting audit state (%d)\n",
  		       audit_default);
 diff --git a/kernel/bpf/core.c b/kernel/bpf/core.c
-index 77044d4a80cc..1b12aa717516 100644
+index 4ea21434bf78..276596e3ebc9 100644
 --- a/kernel/bpf/core.c
 +++ b/kernel/bpf/core.c
-@@ -555,7 +555,7 @@ void bpf_prog_kallsyms_del_all(struct bpf_prog *fp)
+@@ -556,7 +556,7 @@ void bpf_prog_kallsyms_del_all(struct bpf_prog *fp)
  /* All BPF JIT sysctl knobs here. */
  int bpf_jit_enable   __read_mostly = IS_BUILTIN(CONFIG_BPF_JIT_DEFAULT_ON);
  int bpf_jit_kallsyms __read_mostly = IS_BUILTIN(CONFIG_BPF_JIT_DEFAULT_ON);
@@ -2265,11 +2265,11 @@ index 5428a41d70eb..43577453d916 100644
  		       s->size - s->inuse - rsize);
 +		if (!IS_ENABLED(CONFIG_SLAB_SANITIZE_VERIFY) && s->ctor)
 +			s->ctor(x);
-+	}
+ 	}
 +
 +	if (canary) {
 +		set_canary(s, x, s->random_inactive);
- 	}
++	}
 +
  	/* KASAN might put x into memory quarantine, delaying its reuse. */
  	return kasan_slab_free(s, x, init);

@@ -1,5 +1,5 @@
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index 97007f4f69d4..bfe812401922 100644
+index f7f37de60b12..55a5475d659e 100644
 --- a/Documentation/admin-guide/kernel-parameters.txt
 +++ b/Documentation/admin-guide/kernel-parameters.txt
 @@ -775,17 +775,6 @@ Kernel parameters
@@ -102,13 +102,13 @@ index 2e3a746fcc6d..3bb0e085f229 100644
  	If enabled, provide RFC2861 behavior and time out the congestion
  	window after an idle period.  An idle period is defined at
 diff --git a/Makefile b/Makefile
-index fa62d2054cd4..87bb47ce8cd0 100644
+index d7cca59812d8..71917127d847 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -2,7 +2,7 @@
  VERSION = 7
  PATCHLEVEL = 1
- SUBLEVEL = 8
+ SUBLEVEL = 9
 -EXTRAVERSION =
 +EXTRAVERSION = -hardened1
  NAME = Baby Opossum Posse
@@ -306,7 +306,7 @@ index 0545fe75c3fa..d37c738cb23a 100644
  	native_write_cr4(cr4);
  }
 diff --git a/arch/x86/kernel/cpu/common.c b/arch/x86/kernel/cpu/common.c
-index a4268c47f2bc..df54e0cc18ba 100644
+index 558a253c92fa..3585e091b629 100644
 --- a/arch/x86/kernel/cpu/common.c
 +++ b/arch/x86/kernel/cpu/common.c
 @@ -497,6 +497,7 @@ EXPORT_SYMBOL_GPL(native_write_cr4);
@@ -680,10 +680,10 @@ index 2ac67e04a6fb..3340e13c959c 100644
 +
 +	  If unsure, say N.
 diff --git a/fs/overlayfs/super.c b/fs/overlayfs/super.c
-index 60f0b7ceef0a..efe878a702db 100644
+index 60b808b85fc4..ef2637e7d85b 100644
 --- a/fs/overlayfs/super.c
 +++ b/fs/overlayfs/super.c
-@@ -1573,7 +1573,9 @@ struct file_system_type ovl_fs_type = {
+@@ -1574,7 +1574,9 @@ struct file_system_type ovl_fs_type = {
  	.name			= "overlay",
  	.init_fs_context	= ovl_init_fs_context,
  	.parameters		= ovl_parameter_spec,
@@ -1124,7 +1124,7 @@ index 829f49ae07b9..5bb7ee4028ad 100644
  
  /**
 diff --git a/kernel/events/core.c b/kernel/events/core.c
-index 240684f4b18c..081bb1dbfe70 100644
+index 3b4c43203210..21fac770ad8d 100644
 --- a/kernel/events/core.c
 +++ b/kernel/events/core.c
 @@ -491,8 +491,13 @@ static __always_inline bool is_guest_mediated_pmu_loaded(void)
@@ -1141,7 +1141,7 @@ index 240684f4b18c..081bb1dbfe70 100644
  
  /* Minimum for 512 kiB + 1 user control page. 'free' kiB per user. */
  static int sysctl_perf_event_mlock __read_mostly = 512 + (PAGE_SIZE / 1024);
-@@ -13870,7 +13875,7 @@ SYSCALL_DEFINE5(perf_event_open,
+@@ -13877,7 +13882,7 @@ SYSCALL_DEFINE5(perf_event_open,
  		return err;
  
  	/* Do we allow access to perf_event_open(2) ? */
@@ -2727,7 +2727,7 @@ index ca1180dba1de..cc1d065b0407 100644
  
  static struct ctl_table ipv4_net_table[] = {
 diff --git a/net/ipv4/tcp_input.c b/net/ipv4/tcp_input.c
-index eed808c2adbb..2c2bbd46f37c 100644
+index e2c022f02c64..a2236b141a72 100644
 --- a/net/ipv4/tcp_input.c
 +++ b/net/ipv4/tcp_input.c
 @@ -85,6 +85,7 @@

@@ -102,13 +102,13 @@ index dcbb6f6caf6d..d9d2ea78cd4b 100644
  	If set, provide RFC2861 behavior and time out the congestion
  	window after an idle period.  An idle period is defined at
 diff --git a/Makefile b/Makefile
-index f3bacdc021a4..53a51c3b7ad1 100644
+index 69eb37d9d488..626d86bac556 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -2,7 +2,7 @@
  VERSION = 6
  PATCHLEVEL = 12
- SUBLEVEL = 103
+ SUBLEVEL = 104
 -EXTRAVERSION =
 +EXTRAVERSION = -hardened1
  NAME = Baby Opossum Posse
@@ -689,10 +689,10 @@ index 2ac67e04a6fb..3340e13c959c 100644
 +
 +	  If unsure, say N.
 diff --git a/fs/overlayfs/super.c b/fs/overlayfs/super.c
-index c3d84eafde9f..a2186edafb00 100644
+index bd0c548cf1ee..1b5ee50f36b3 100644
 --- a/fs/overlayfs/super.c
 +++ b/fs/overlayfs/super.c
-@@ -1483,7 +1483,9 @@ struct file_system_type ovl_fs_type = {
+@@ -1484,7 +1484,9 @@ struct file_system_type ovl_fs_type = {
  	.name			= "overlay",
  	.init_fs_context	= ovl_init_fs_context,
  	.parameters		= ovl_parameter_spec,
@@ -2323,7 +2323,7 @@ index 63625a5038af..7b0822143f38 100644
  
  static struct ctl_table ipv4_net_table[] = {
 diff --git a/net/ipv4/tcp_input.c b/net/ipv4/tcp_input.c
-index e57917aefd50..b2c1762beba3 100644
+index 2fb68455679a..beab44651b7c 100644
 --- a/net/ipv4/tcp_input.c
 +++ b/net/ipv4/tcp_input.c
 @@ -83,6 +83,7 @@
