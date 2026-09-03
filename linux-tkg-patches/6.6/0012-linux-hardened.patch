@@ -102,13 +102,13 @@ index 531a070df2a6..2d3b8d79380a 100644
  	If set, provide RFC2861 behavior and time out the congestion
  	window after an idle period.  An idle period is defined at
 diff --git a/Makefile b/Makefile
-index 13d82f5eefd2..6527221d18f5 100644
+index 5e6219652cd7..987a52626ceb 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -2,7 +2,7 @@
  VERSION = 6
  PATCHLEVEL = 6
- SUBLEVEL = 152
+ SUBLEVEL = 156
 -EXTRAVERSION =
 +EXTRAVERSION = -hardened1
  NAME = Pinguïn Aangedreven
@@ -594,10 +594,10 @@ index 7d338e9c0657..64ac3c36fa1a 100644
  ifdef CONFIG_USB_ONBOARD_HUB
  usbcore-y			+= ../misc/onboard_usb_hub_pdevs.o
 diff --git a/drivers/usb/core/hub.c b/drivers/usb/core/hub.c
-index bebc41308ca9..2a47c89bf932 100644
+index c0d8259975e3..7a6f61f888fe 100644
 --- a/drivers/usb/core/hub.c
 +++ b/drivers/usb/core/hub.c
-@@ -5410,6 +5410,12 @@ static void hub_port_connect(struct usb_hub *hub, int port1, u16 portstatus,
+@@ -5415,6 +5415,12 @@ static void hub_port_connect(struct usb_hub *hub, int port1, u16 portstatus,
  			goto done;
  		return;
  	}
@@ -694,7 +694,7 @@ index da6d5e5f79e7..1d87d823cd81 100644
  	usb_debugfs_cleanup();
  	idr_destroy(&usb_bus_idr);
 diff --git a/fs/exec.c b/fs/exec.c
-index 9d3e2eda9d55..16aeca4603d6 100644
+index 359158943746..4bc3bdbbd54a 100644
 --- a/fs/exec.c
 +++ b/fs/exec.c
 @@ -66,6 +66,7 @@
@@ -904,10 +904,10 @@ index 767c535dbd38..83bdbefbc0f5 100644
  {
  	return true;
 diff --git a/include/linux/fs.h b/include/linux/fs.h
-index e6b2e2749e37..a39b5a7365f4 100644
+index 12ea9af49a89..e7887d5e1ae8 100644
 --- a/include/linux/fs.h
 +++ b/include/linux/fs.h
-@@ -3489,4 +3489,15 @@ extern int vfs_fadvise(struct file *file, loff_t offset, loff_t len,
+@@ -3501,4 +3501,15 @@ extern int vfs_fadvise(struct file *file, loff_t offset, loff_t len,
  extern int generic_fadvise(struct file *file, loff_t offset, loff_t len,
  			   int advice);
  
@@ -1111,7 +1111,7 @@ index 733f2a97589b..27c0dc60207e 100644
  {
  	return &init_user_ns;
 diff --git a/include/net/tcp.h b/include/net/tcp.h
-index 0eb9341f7488..e22de8eb7d0a 100644
+index 23d830a7a6c8..1dbb01e8fb78 100644
 --- a/include/net/tcp.h
 +++ b/include/net/tcp.h
 @@ -250,6 +250,7 @@ void tcp_time_wait(struct sock *sk, int state, int timeo);
@@ -1264,7 +1264,7 @@ index dac4df77e376..68bb3279b14f 100644
  
  /**
 diff --git a/kernel/events/core.c b/kernel/events/core.c
-index d45bce2acdbc..2650b50b391c 100644
+index 95743e6c5b0c..ce289c6188c0 100644
 --- a/kernel/events/core.c
 +++ b/kernel/events/core.c
 @@ -432,8 +432,13 @@ static struct kmem_cache *perf_event_cache;
@@ -1281,7 +1281,7 @@ index d45bce2acdbc..2650b50b391c 100644
  
  /* Minimum for 512 kiB + 1 user control page */
  int sysctl_perf_event_mlock __read_mostly = 512 + (PAGE_SIZE / 1024); /* 'free' kiB per user */
-@@ -12626,7 +12631,7 @@ SYSCALL_DEFINE5(perf_event_open,
+@@ -12634,7 +12639,7 @@ SYSCALL_DEFINE5(perf_event_open,
  		return err;
  
  	/* Do we allow access to perf_event_open(2) ? */
@@ -1291,7 +1291,7 @@ index d45bce2acdbc..2650b50b391c 100644
  		return err;
  
 diff --git a/kernel/fork.c b/kernel/fork.c
-index 36854aaec482..d89ff0bb271f 100644
+index 73e8a6b430a0..870cc908c173 100644
 --- a/kernel/fork.c
 +++ b/kernel/fork.c
 @@ -81,6 +81,7 @@
@@ -1577,7 +1577,7 @@ index 1d8e47bed3f1..fec01d016a35 100644
  static DEFINE_MUTEX(userns_state_mutex);
  
 diff --git a/lib/Kconfig.debug b/lib/Kconfig.debug
-index e56f9e1b18fd..41072b63be91 100644
+index e394eb0f85ab..8dd1fee5858b 100644
 --- a/lib/Kconfig.debug
 +++ b/lib/Kconfig.debug
 @@ -506,6 +506,9 @@ config SECTION_MISMATCH_WARN_ONLY
@@ -1798,10 +1798,10 @@ index 018a5bd2f576..1d4a21fe351c 100644
  	  Generate a warning if any W+X mappings are found at boot.
  
 diff --git a/mm/internal.h b/mm/internal.h
-index f773db493a99..70fee60efcd5 100644
+index 03cfd9f73659..236991b1b33e 100644
 --- a/mm/internal.h
 +++ b/mm/internal.h
-@@ -483,6 +483,9 @@ static inline struct folio *page_rmappable_folio(struct page *page)
+@@ -484,6 +484,9 @@ static inline struct folio *page_rmappable_folio(struct page *page)
  	return folio;
  }
  
@@ -2485,10 +2485,10 @@ index 08d494896552..d3d74a0a0964 100644
  
  unsigned long arch_mmap_rnd(void)
 diff --git a/net/core/dev.c b/net/core/dev.c
-index 0fa5431de2cc..2bcdb3de1e24 100644
+index f2c7bb0fc7f9..e67be43b9dda 100644
 --- a/net/core/dev.c
 +++ b/net/core/dev.c
-@@ -5247,7 +5247,7 @@ int netif_rx(struct sk_buff *skb)
+@@ -5258,7 +5258,7 @@ int netif_rx(struct sk_buff *skb)
  }
  EXPORT_SYMBOL(netif_rx);
  
@@ -2497,7 +2497,7 @@ index 0fa5431de2cc..2bcdb3de1e24 100644
  {
  	struct softnet_data *sd = this_cpu_ptr(&softnet_data);
  
-@@ -6826,7 +6826,7 @@ static int napi_threaded_poll(void *data)
+@@ -6837,7 +6837,7 @@ static int napi_threaded_poll(void *data)
  	return 0;
  }
  
@@ -2566,7 +2566,7 @@ index ff849a5b863e..c3c38305bfa2 100644
  };
  
 diff --git a/net/ipv4/tcp_input.c b/net/ipv4/tcp_input.c
-index 9efb84658a82..410647aa4968 100644
+index 1a0dd36d5070..d543c6e6f974 100644
 --- a/net/ipv4/tcp_input.c
 +++ b/net/ipv4/tcp_input.c
 @@ -82,6 +82,7 @@
@@ -2577,7 +2577,7 @@ index 9efb84658a82..410647aa4968 100644
  
  #define FLAG_DATA		0x01 /* Incoming frame contained data.		*/
  #define FLAG_WIN_UPDATE		0x02 /* Incoming ACK was a window update.	*/
-@@ -6509,7 +6510,7 @@ static int tcp_rcv_synsent_state_process(struct sock *sk, struct sk_buff *skb,
+@@ -6539,7 +6540,7 @@ static int tcp_rcv_synsent_state_process(struct sock *sk, struct sk_buff *skb,
  		SKB_DR_SET(reason, TCP_RFC7323_PAWS);
  		goto discard_and_undo;
  	}
